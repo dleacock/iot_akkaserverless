@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.leacock.domain;
+
+import "akkaserverless/annotations.proto";
+
+option java_outer_classname = "DeviceDomain";
+
+option (akkaserverless.file).value_entity = {
+  name: "Device"
+  entity_type: "device"
+  state: "DeviceState"
+};
+
+message DeviceState {
+  string name = 1;
+}

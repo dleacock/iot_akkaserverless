@@ -1,0 +1,24 @@
+// This is the public API offered by your entity.
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "akkaserverless/annotations.proto";
+import "google/api/annotations.proto";
+
+package com.leacock;
+
+option java_outer_classname = "DeviceApi";
+
+message DeviceConnected {
+  string device_id = 1 [(akkaserverless.field).entity_key = true];
+  string name = 2;
+}
+
+service DeviceService {
+  option (akkaserverless.service) = {
+    type : SERVICE_TYPE_ENTITY
+    component : ".domain.Device"
+  };
+
+  rpc ConnectDevice(DeviceConnected) returns (google.protobuf.Empty);
+}
