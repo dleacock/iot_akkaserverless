@@ -20,12 +20,42 @@ public class DeviceTest {
         // of events emitted, or a final updated state:
         DeviceApi.DeviceConnected deviceConnected =
                 DeviceApi.DeviceConnected.newBuilder()
-                        .setName("iot")
+                        .setDeviceName("thermometer")
                         .setDeviceId("001")
+                        .setCurrentValue("21")
                         .build();
 
         ValueEntityResult<Empty> result = testKit.connectDevice(deviceConnected);
         assertEquals(Empty.getDefaultInstance(), result.getReply());
-        assertEquals(testKit.getState().getName(), "iot_001");
+        assertEquals(testKit.getState().getDeviceName(), "thermometer");
+        assertEquals(testKit.getState().getDeviceId(), "001");
+        assertEquals(testKit.getState().getCurrentValue(), "21");
+    }
+
+    @Test
+    public void deviceStateChanged() {
+        DeviceTestKit testKit = DeviceTestKit.of(Device::new);
+        // use the testkit to execute a command
+        // of events emitted, or a final updated state:
+        DeviceApi.DeviceConnected deviceConnected =
+                DeviceApi.DeviceConnected.newBuilder()
+                        .setDeviceName("thermometer")
+                        .setDeviceId("001")
+                        .setCurrentValue("21")
+                        .build();
+
+        ValueEntityResult<Empty> result = testKit.connectDevice(deviceConnected);
+
+        DeviceApi.DeviceStateChanged deviceStateChanged = DeviceApi.DeviceStateChanged.newBuilder()
+                .setDeviceId("001")
+                .setCurrentValue("30")
+                .build();
+
+        testKit.changeDeviceState(deviceStateChanged);
+
+        assertEquals(Empty.getDefaultInstance(), result.getReply());
+        assertEquals(testKit.getState().getDeviceName(), "thermometer");
+        assertEquals(testKit.getState().getDeviceId(), "001");
+        assertEquals(testKit.getState().getCurrentValue(), "30");
     }
 }

@@ -7,9 +7,16 @@ package iot.domain;
 import com.akkaserverless.javasdk.valueentity.ValueEntityContext;
 import com.google.protobuf.Empty;
 import iot.DeviceApi;
+import iot.DeviceStatePublishingServiceAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** A value entity. */
 public class Device extends AbstractDevice {
+
+  private static final Logger log = LoggerFactory.getLogger(Device.class);
+
+
   @SuppressWarnings("unused")
   private final String entityId;
 
@@ -24,10 +31,34 @@ public class Device extends AbstractDevice {
 
   @Override
   public Effect<Empty> connectDevice(DeviceDomain.DeviceState currentState, DeviceApi.DeviceConnected command) {
-    String deviceId = command.getDeviceId();
-    String name = command.getName();
 
-    DeviceDomain.DeviceState newState = currentState.toBuilder().setName(name + "_" + deviceId).build();
+    String deviceId = command.getDeviceId();
+    String name = command.getDeviceName();
+    String currentValue = command.getCurrentValue();
+
+    log.info("Connecting Device: {} - {}", name, deviceId);
+
+    DeviceDomain.DeviceState newState = currentState.toBuilder()
+            .setDeviceId(deviceId)
+            .setDeviceName(name)
+            .setCurrentValue(currentValue)
+            .build();
+
+    return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
+  }
+
+  @Override
+  public Effect<Empty> changeDeviceState(DeviceDomain.DeviceState currentState, DeviceApi.DeviceStateChanged deviceStateChanged) {
+    String deviceId = deviceStateChanged.getDeviceId();
+    String newValue = deviceStateChanged.getCurrentValue();
+
+    log.info("Device state changed!: {} - {}", deviceId, newValue);
+
+    DeviceDomain.DeviceState newState = currentState.toBuilder()
+            .setDeviceId(deviceId)
+            .setDeviceName(currentState.getDeviceName())
+            .setCurrentValue(newValue)
+            .build();
 
     return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
   }

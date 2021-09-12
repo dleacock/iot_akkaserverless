@@ -12,19 +12,20 @@ import iot.domain.Device;
 
 public final class Main {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-  public static AkkaServerless createAkkaServerless() {
-    // The AkkaServerlessFactory automatically registers any generated Actions, Views or Entities,
-    // and is kept up-to-date with any changes in your protobuf definitions.
-    // If you prefer, you may remove this and manually register these components in a
-    // `new AkkaServerless()` instance.
-    return AkkaServerlessFactory.withComponents(
-      Device::new);
-  }
+    public static AkkaServerless createAkkaServerless() {
+        // The AkkaServerlessFactory automatically registers any generated Actions, Views or Entities,
+        // and is kept up-to-date with any changes in your protobuf definitions.
+        // If you prefer, you may remove this and manually register these components in a
+        // `new AkkaServerless()` instance.
+        return AkkaServerlessFactory.withComponents(
+                Device::new, DeviceStatePublishingServiceAction::new
+        );
+    }
 
-  public static void main(String[] args) throws Exception {
-    LOG.info("starting the Akka Serverless service");
-    createAkkaServerless().start();
-  }
+    public static void main(String[] args) throws Exception {
+        LOG.info("starting the Akka Serverless service");
+        createAkkaServerless().start();
+    }
 }

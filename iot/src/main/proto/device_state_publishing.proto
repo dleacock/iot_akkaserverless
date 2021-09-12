@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package iot;
+
+import "akkaserverless/annotations.proto";
+
+import "domain/device_domain.proto";
+
+option java_outer_classname = "DeviceStatePublishing";
+
+service DeviceStatePublishingService {
+  option (akkaserverless.service) = {
+    type : SERVICE_TYPE_ACTION
+  };
+
+  rpc PublishDeviceStateChange(domain.DeviceState) returns (DeviceStateChange) {
+    option (akkaserverless.method).eventing = {
+      in: {
+        value_entity: "device";
+      }
+      out: {
+        topic: "device-state-change";
+      }
+    };
+  }
+}
+
+message DeviceStateChange {
+  string device_id = 1;
+  string state = 2;
+}
