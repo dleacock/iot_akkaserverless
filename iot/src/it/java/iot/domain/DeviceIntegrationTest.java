@@ -5,7 +5,6 @@
 package iot.domain;
 
 import com.akkaserverless.javasdk.testkit.junit.AkkaServerlessTestkitResource;
-import com.google.protobuf.Empty;
 import iot.DeviceApi;
 import iot.DeviceServiceClient;
 import iot.Main;
@@ -38,26 +37,26 @@ public class DeviceIntegrationTest {
     public void connectDeviceOnNonExistingEntity() throws Exception {
 
 
-        final String deviceId = "001";
-        final String deviceName = "thermometer";
-        final String initialDeviceState = "21";
-        final String newDeviceState = "31";
+        final String thermostatDeviceId = "001";
+        final String thermostatDeviceName = "living room thermometer";
+        final String thermostatInitialState = "21C";
+        final String thermostatNewState = "31C";
 
 
-        DeviceApi.DeviceConnected deviceConnected = DeviceApi.DeviceConnected.newBuilder()
-                .setDeviceId(deviceId)
-                .setDeviceName(deviceName)
-                .setCurrentValue(initialDeviceState)
+        final DeviceApi.DeviceConnected thermostatConnected = DeviceApi.DeviceConnected.newBuilder()
+                .setDeviceId(thermostatDeviceId)
+                .setDeviceName(thermostatDeviceName)
+                .setCurrentValue(thermostatInitialState)
                 .build();
-        DeviceApi.DeviceStateChanged deviceStateChanged = DeviceApi.DeviceStateChanged.newBuilder()
-                .setDeviceId(deviceId)
-                .setCurrentValue(newDeviceState)
+        final DeviceApi.DeviceStateChanged thermostateStateChanged = DeviceApi.DeviceStateChanged.newBuilder()
+                .setDeviceId(thermostatDeviceId)
+                .setCurrentValue(thermostatNewState)
                 .build();
 
-        client.connectDevice(deviceConnected)
+        client.connectDevice(thermostatConnected)
                 .toCompletableFuture().get(2, SECONDS);
 
-        client.changeDeviceState(deviceStateChanged)
+        client.changeDeviceState(thermostateStateChanged)
                 .toCompletableFuture().get(2, SECONDS);
     }
 }

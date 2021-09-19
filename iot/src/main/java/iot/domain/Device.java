@@ -8,58 +8,72 @@ import com.akkaserverless.javasdk.valueentity.ValueEntityContext;
 import com.google.protobuf.Empty;
 import iot.DeviceApi;
 import iot.DeviceStatePublishingServiceAction;
+import iot.domain.DeviceDomain.DeviceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A value entity. */
+/**
+ * A value entity.
+ */
 public class Device extends AbstractDevice {
 
-  private static final Logger log = LoggerFactory.getLogger(Device.class);
+    private static final Logger log = LoggerFactory.getLogger(Device.class);
 
+    @SuppressWarnings("unused")
+    private final String entityId;
 
-  @SuppressWarnings("unused")
-  private final String entityId;
+    public Device(ValueEntityContext context) {
+        this.entityId = context.entityId();
+    }
 
-  public Device(ValueEntityContext context) {
-    this.entityId = context.entityId();
-  }
+    @Override
+    public DeviceState emptyState() {
+        return DeviceState.getDefaultInstance();
+    }
 
-  @Override
-  public DeviceDomain.DeviceState emptyState() {
-    return DeviceDomain.DeviceState.getDefaultInstance();
-  }
+    @Override
+    public Effect<Empty> connectDevice(DeviceState currentState, DeviceApi.DeviceConnected command) {
 
-  @Override
-  public Effect<Empty> connectDevice(DeviceDomain.DeviceState currentState, DeviceApi.DeviceConnected command) {
+        final String deviceId = command.getDeviceId();
+        final String name = command.getDeviceName();
+        final String currentValue = command.getCurrentValue();
 
-    String deviceId = command.getDeviceId();
-    String name = command.getDeviceName();
-    String currentValue = command.getCurrentValue();
+        if (currentState.getDeviceId().equals(deviceId)) {
+            log.info("Device {} - {} already connected.", name, deviceId);
 
-    log.info("Connecting Device: {} - {}", name, deviceId);
+            return effects().reply(Empty.getDefaultInstance());
+        } else {
+            log.info("Connecting Device: {} - {}", name, deviceId);
 
-    DeviceDomain.DeviceState newState = currentState.toBuilder()
-            .setDeviceId(deviceId)
-            .setDeviceName(name)
-            .setCurrentValue(currentValue)
-            .build();
+            final DeviceState newState = currentState.toBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceName(name)
+                    .setCurrentValue(currentValue)
+                    .build();
 
-    return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
-  }
+            return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
+        }
+    }
 
-  @Override
-  public Effect<Empty> changeDeviceState(DeviceDomain.DeviceState currentState, DeviceApi.DeviceStateChanged deviceStateChanged) {
-    String deviceId = deviceStateChanged.getDeviceId();
-    String newValue = deviceStateChanged.getCurrentValue();
+    @Override
+    public Effect<Empty> changeDeviceState(DeviceState currentState, DeviceApi.DeviceStateChanged deviceStateChanged) {
+        final String deviceId = deviceStateChanged.getDeviceId();
+        final String newValue = deviceStateChanged.getCurrentValue();
 
-    log.info("Device state changed!: {} - {}", deviceId, newValue);
+        if (!currentState.getDeviceId().equals(deviceId)) {
+            log.info("Unknown Device: {}", deviceId);
+            return effects().reply(Empty.getDefaultInstance());
+        } else {
 
-    DeviceDomain.DeviceState newState = currentState.toBuilder()
-            .setDeviceId(deviceId)
-            .setDeviceName(currentState.getDeviceName())
-            .setCurrentValue(newValue)
-            .build();
+            log.info("Device - {} state changed: {}", deviceId, newValue);
 
-    return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
-  }
+            final DeviceState newState = currentState.toBuilder()
+                    .setDeviceId(deviceId)
+                    .setDeviceName(currentState.getDeviceName())
+                    .setCurrentValue(newValue)
+                    .build();
+
+            return effects().updateState(newState).thenReply(Empty.getDefaultInstance());
+        }
+    }
 }
