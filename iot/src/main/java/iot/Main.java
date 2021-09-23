@@ -6,6 +6,7 @@
 package iot;
 
 import com.akkaserverless.javasdk.AkkaServerless;
+import iot.view.GetDevicesView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import iot.domain.Device;
@@ -20,7 +21,9 @@ public final class Main {
         // If you prefer, you may remove this and manually register these components in a
         // `new AkkaServerless()` instance.
         return AkkaServerlessFactory.withComponents(
-                Device::new, DeviceStatePublishingServiceAction::new
+                Device::new,
+                DeviceStatePublishingServiceAction::new,
+                GetDevicesView::new
         );
     }
 
