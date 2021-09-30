@@ -1,0 +1,32 @@
+// This is the public API offered by your entity.
+syntax = "proto3";
+
+package iot;
+
+import "akkaserverless/annotations.proto";
+import "domain/device_domain.proto";
+import "google/protobuf/empty.proto";
+
+option java_outer_classname = "DeviceApi";
+
+message ConnectDevice {
+    string id = 1 [(akkaserverless.field).entity_key = true];
+    string name = 2;
+    domain.DeviceType type = 3;
+    string value = 4;
+}
+
+message UpdateDeviceState {
+    string id = 1 [(akkaserverless.field).entity_key = true];
+    string value = 2;
+}
+
+service DeviceService {
+    option (akkaserverless.service) = {
+        type: SERVICE_TYPE_ENTITY
+        component: ".domain.Device"
+    };
+
+    rpc Connect(ConnectDevice) returns (google.protobuf.Empty);
+    rpc UpdateState(UpdateDeviceState) returns (google.protobuf.Empty);
+}
