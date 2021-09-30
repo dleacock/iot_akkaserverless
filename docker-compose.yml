@@ -1,6 +1,6 @@
 version: "3"
 services:
-  akka-serverless-proxy_device:
+  akka-serverless-proxy_DEVICE:
     image: gcr.io/akkaserverless-public/akkaserverless-proxy:0.7.0-beta.18
     command: -Dconfig.resource=dev-mode.conf -Dakkaserverless.proxy.eventing.support=google-pubsub-emulator
     ports:
@@ -9,7 +9,7 @@ services:
       USER_FUNCTION_HOST: ${USER_FUNCTION_HOST:-host.docker.internal}
       USER_FUNCTION_PORT: ${USER_FUNCTION_PORT:-8081}
       PUBSUB_EMULATOR_HOST: gcloud-pubsub-emulator
-  akka-serverless-proxy_other:
+  akka-serverless-proxy_SMARTTHERMOSTAT:
     image: gcr.io/akkaserverless-public/akkaserverless-proxy:0.7.0-beta.18
     command: -Dconfig.resource=dev-mode.conf -Dakkaserverless.proxy.eventing.support=google-pubsub-emulator
     ports:
