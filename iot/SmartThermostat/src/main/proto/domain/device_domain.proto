@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package iot.domain;
+
+option java_outer_classname = "DeviceDomain";
+
+message DeviceState {
+    string id = 1;
+    string name = 2;
+    DeviceType type = 3;
+    string value = 4;
+}
+
+enum DeviceType {
+    THERMOSTAT = 0;
+    LOCK = 1;
+}

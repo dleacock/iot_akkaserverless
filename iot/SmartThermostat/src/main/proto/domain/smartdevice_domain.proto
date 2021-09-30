@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package iot.domain;
+
+import "akkaserverless/annotations.proto";
+
+option java_outer_classname = "SmartDeviceDomain";
+
+option (akkaserverless.file).value_entity = {
+    name: "SmartDevice"
+    entity_type: "smartdevice"
+    state: "SmartDeviceState"
+};
+
+message SmartDeviceState {
+    string device_id = 1;
+    string device_name = 2;
+    string current_value = 3;
+}
+
+message SmartDeviceConnected {
+    string device_id = 1;
+    string device_name = 2;
+    string current_value = 3;
+}

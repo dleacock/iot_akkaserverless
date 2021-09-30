@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package iot.action;
+
+import "akkaserverless/annotations.proto";
+import "domain/device_domain.proto";
+import "google/protobuf/empty.proto";
+
+option java_outer_classname = "SmartDeviceSubApi";
+
+service DeviceTopicSubscription {
+    option (akkaserverless.service) = {
+        type : SERVICE_TYPE_ACTION  // <2>
+    };
+
+    rpc Connect (iot.domain.DeviceState) returns (google.protobuf.Empty) {
+        option (akkaserverless.method).eventing.in = { // <3>
+                topic:  "devices"
+        };
+    }
+}

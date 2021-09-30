@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package iot.api;
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option java_outer_classname = "SmartDeviceApi";
+
+message SmartDeviceConnected {
+    string device_id = 1 [(akkaserverless.field).entity_key = true];
+    string device_name = 2;
+    string current_value = 3;
+}
+
+service SmartDeviceService {
+    option (akkaserverless.service) = {
+        type : SERVICE_TYPE_ENTITY
+        component : "iot.domain.SmartDevice"
+    };
+
+    rpc ConnectDevice(SmartDeviceConnected) returns (google.protobuf.Empty);
+}
