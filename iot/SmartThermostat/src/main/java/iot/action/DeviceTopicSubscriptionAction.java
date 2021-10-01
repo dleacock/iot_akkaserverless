@@ -5,33 +5,21 @@
 
 package iot.action;
 
-import com.akkaserverless.javasdk.JsonSupport;
 import com.akkaserverless.javasdk.ServiceCallRef;
 import com.akkaserverless.javasdk.action.ActionCreationContext;
-import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Empty;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.ProtocolMessageEnum;
 import iot.api.SmartDeviceApi;
-import iot.domain.DeviceDomain;
-import iot.domain.SmartDeviceDomain;
+import iot.domain.DeviceDomain.DeviceState;
+import iot.domain.DeviceDomain.DeviceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.List;
 
 /**
  * An action.
  */
 public class DeviceTopicSubscriptionAction extends AbstractDeviceTopicSubscriptionAction {
-
     private static final Logger log = LoggerFactory.getLogger(DeviceTopicSubscriptionAction.class);
     private final ServiceCallRef<SmartDeviceApi.SmartDeviceConnected> deviceConnectedServiceCallRef;
-
 
     public DeviceTopicSubscriptionAction(ActionCreationContext creationContext) {
         deviceConnectedServiceCallRef = creationContext
@@ -40,15 +28,17 @@ public class DeviceTopicSubscriptionAction extends AbstractDeviceTopicSubscripti
     }
 
     @Override
-    public Effect<Empty> connect(DeviceDomain.DeviceState deviceState) {
+    public Effect<Empty> connect(DeviceState deviceState) {
+        final String deviceId = deviceState.getId();
+        final String deviceName = deviceState.getName();
+        final String currentValue = deviceState.getValue();
+        final DeviceType deviceType = deviceState.getType();
 
+        if (!deviceType.equals(DeviceType.THERMOSTAT)) {
+            return effects().reply(Empty.getDefaultInstance());
+        }
 
-        String deviceId = deviceState.getId();
-        String deviceName = deviceState.getName();
-        String currentValue = deviceState.getValue();
-        DeviceDomain.DeviceType deviceType = deviceState.getType();
-
-        log.info("Handler for Smart Device Connected id={}, name={}, val={} - Sending API call", deviceId, deviceName, currentValue);
+        log.info("Device Connected id={}, name={}, val={} - Sending API call", deviceId, deviceName, currentValue);
 
         SmartDeviceApi.SmartDeviceConnected deviceConnected = SmartDeviceApi.SmartDeviceConnected.newBuilder()
                 .setDeviceId(deviceId)

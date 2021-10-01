@@ -32,11 +32,11 @@ public class SmartDevice extends AbstractSmartDevice {
     final String currentValue = command.getCurrentValue();
 
     if (currentState.getDeviceId().equals(deviceId)) {
-      log.info("SmartDevice {} - {} already connected.", name, deviceId);
+      log.info("SmartThermostat {} - {} already connected.", name, deviceId);
 
       return effects().reply(Empty.getDefaultInstance());
     } else {
-      log.info("Connecting SmartDevice id={}, name={}, current value={}", deviceId, name, currentValue);
+      log.info("Connecting SmartThermostat id={}, name={}, current value={}", deviceId, name, currentValue);
 
       final SmartDeviceDomain.SmartDeviceState newState = currentState.toBuilder()
               .setDeviceId(deviceId)
