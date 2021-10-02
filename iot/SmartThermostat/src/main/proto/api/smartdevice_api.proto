@@ -5,19 +5,18 @@ package iot.api;
 import "akkaserverless/annotations.proto";
 import "google/protobuf/empty.proto";
 
-option java_outer_classname = "SmartDeviceApi";
+option java_outer_classname = "SmartThermostatApi";
 
-message SmartDeviceConnected {
-    string device_id = 1 [(akkaserverless.field).entity_key = true];
-    string device_name = 2;
-    string current_value = 3;
+message SmartThermostat {
+    string id = 1 [(akkaserverless.field).entity_key = true];
+    string value = 2;
 }
 
-service SmartDeviceService {
+service SmartThermostatService {
     option (akkaserverless.service) = {
         type : SERVICE_TYPE_ENTITY
-        component : "iot.domain.SmartDevice"
+        component : "iot.domain.SmartThermostat"
     };
 
-    rpc ConnectDevice(SmartDeviceConnected) returns (google.protobuf.Empty);
+    rpc UpsertSmartThermostat(SmartThermostat) returns (google.protobuf.Empty);
 }

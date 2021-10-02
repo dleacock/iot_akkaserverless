@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package iot.domain;
+
+import "akkaserverless/annotations.proto";
+
+option java_outer_classname = "SmartThermostatDomain";
+
+option (akkaserverless.file).value_entity = {
+    name: "SmartThermostat"
+    entity_type: "smartthermostat"
+    state: "SmartThermostatState"
+};
+
+message SmartThermostatState {
+    string id = 1;
+    string value = 2;
+}

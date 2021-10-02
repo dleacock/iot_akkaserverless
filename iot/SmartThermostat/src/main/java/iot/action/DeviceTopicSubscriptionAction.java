@@ -8,7 +8,7 @@ package iot.action;
 import com.akkaserverless.javasdk.ServiceCallRef;
 import com.akkaserverless.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Empty;
-import iot.api.SmartDeviceApi;
+import iot.api.SmartThermostatApi.SmartThermostat;
 import iot.domain.DeviceDomain.DeviceState;
 import iot.domain.DeviceDomain.DeviceType;
 import org.slf4j.Logger;
@@ -19,12 +19,12 @@ import org.slf4j.LoggerFactory;
  */
 public class DeviceTopicSubscriptionAction extends AbstractDeviceTopicSubscriptionAction {
     private static final Logger log = LoggerFactory.getLogger(DeviceTopicSubscriptionAction.class);
-    private final ServiceCallRef<SmartDeviceApi.SmartDeviceConnected> deviceConnectedServiceCallRef;
+    private final ServiceCallRef<SmartThermostat> createSmartThermostatServiceCallRef;
 
     public DeviceTopicSubscriptionAction(ActionCreationContext creationContext) {
-        deviceConnectedServiceCallRef = creationContext
+        createSmartThermostatServiceCallRef = creationContext
                 .serviceCallFactory()
-                .lookup("iot.api.SmartDeviceService", "ConnectDevice", SmartDeviceApi.SmartDeviceConnected.class);
+                .lookup("iot.api.SmartThermostatService", "UpsertSmartThermostat", SmartThermostat.class);
     }
 
     @Override
@@ -38,14 +38,14 @@ public class DeviceTopicSubscriptionAction extends AbstractDeviceTopicSubscripti
             return effects().reply(Empty.getDefaultInstance());
         }
 
-        log.info("Device Connected id={}, name={}, val={} - Sending API call", deviceId, deviceName, currentValue);
+        log.info("Thermostat State detected id={}, name={}, val={} - Sending API call to SmartThermostat",
+                deviceId, deviceName, currentValue);
 
-        SmartDeviceApi.SmartDeviceConnected deviceConnected = SmartDeviceApi.SmartDeviceConnected.newBuilder()
-                .setDeviceId(deviceId)
-                .setDeviceName(deviceName)
-                .setCurrentValue(currentValue)
+        SmartThermostat createSmartThermostat = SmartThermostat.newBuilder()
+                .setId(deviceId)
+                .setValue(currentValue)
                 .build();
 
-        return effects().forward(deviceConnectedServiceCallRef.createCall(deviceConnected));
+        return effects().forward(createSmartThermostatServiceCallRef.createCall(createSmartThermostat));
     }
 }

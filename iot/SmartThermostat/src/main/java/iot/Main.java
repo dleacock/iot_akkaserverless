@@ -8,10 +8,10 @@ package iot;
 import com.akkaserverless.javasdk.AkkaServerless;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import iot.domain.SmartThermostat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import iot.action.DeviceTopicSubscriptionAction;
-import iot.domain.SmartDevice;
 
 public final class Main {
 
@@ -23,7 +23,7 @@ public final class Main {
     // If you prefer, you may remove this and manually register these components in a
     // `new AkkaServerless()` instance.
     return AkkaServerlessFactory.withComponents(
-      SmartDevice::new,
+      SmartThermostat::new,
       DeviceTopicSubscriptionAction::new);
   }
 

@@ -6,7 +6,7 @@ import "akkaserverless/annotations.proto";
 import "domain/device_domain.proto";
 import "google/protobuf/empty.proto";
 
-option java_outer_classname = "SmartDeviceSubApi";
+option java_outer_classname = "SmartThermostatSubApi";
 
 service DeviceTopicSubscription {
     option (akkaserverless.service) = {
