@@ -34,11 +34,16 @@ public class SmartThermostat extends AbstractSmartThermostat {
         final String currentValue = smartThermostat.getValue();
 
         if (currentState.getId().equals(smartThermostatId)) {
-            log.info("SmartThermostat {} already connected.", smartThermostatId);
+            log.info("Updating state for {} from {} to {}", smartThermostatId,  currentState.getValue(), currentValue);
 
-            // UPDATE STATE
+            final SmartThermostatState updatedSmartThermostatState = currentState.toBuilder()
+                    .setId(smartThermostatId)
+                    .setValue(currentValue)
+                    .build();
 
-            return effects().reply(Empty.getDefaultInstance());
+            return effects()
+                    .updateState(updatedSmartThermostatState)
+                    .thenReply(Empty.getDefaultInstance());
         } else {
             log.info("Connecting SmartThermostat id={}, current value={}", smartThermostatId, currentValue);
 
