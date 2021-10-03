@@ -13,5 +13,4 @@ message DeviceState {
 
 enum DeviceType {
     THERMOSTAT = 0;
-    LOCK = 1;
 }
