@@ -26,6 +26,8 @@ message DeviceState {
     string name = 2;
     DeviceType type = 3;
     string value = 4;
+    string created_timestamp = 5;
+    string mac_address = 6;
 }
 
 enum DeviceType {

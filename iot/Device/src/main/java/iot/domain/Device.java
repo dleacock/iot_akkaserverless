@@ -4,8 +4,6 @@
  */
 package iot.domain;
 
-import com.akkaserverless.javasdk.ServiceCallRef;
-import com.akkaserverless.javasdk.SideEffect;
 import com.akkaserverless.javasdk.valueentity.ValueEntityContext;
 import com.google.protobuf.Empty;
 import iot.DeviceApi;
@@ -13,7 +11,9 @@ import iot.domain.DeviceDomain.DeviceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static iot.domain.DeviceDomain.*;
+import java.time.Instant;
+
+import static iot.domain.DeviceDomain.DeviceType;
 
 /**
  * A value entity.
@@ -40,19 +40,23 @@ public class Device extends AbstractDevice {
         final String name = connectDevice.getName();
         final DeviceType deviceType = connectDevice.getType();
         final String currentValue = connectDevice.getValue();
+        final String macAddress = connectDevice.getMacAddress();
+        final String timestamp = Instant.now().toString();
 
         if (state.getId().equals(deviceId)) {
             log.info("Device {} - {} already connected.", name, deviceId);
             return effects().reply(Empty.getDefaultInstance());
         } else {
-            log.info("Connecting Device id={} name={} type={} current value={}",
-                    deviceId, name, deviceType, currentValue);
+            log.info("Connecting Device id={} name={} type={} value={} mac address={} at timestamp={}",
+                    deviceId, name, deviceType, currentValue, macAddress, timestamp);
 
             final DeviceState initialState = state.toBuilder()
                     .setId(deviceId)
                     .setName(name)
                     .setType(deviceType)
                     .setValue(currentValue)
+                    .setMacAddress(macAddress)
+                    .setCreatedTimestamp(timestamp)
                     .build();
 
             return effects()
@@ -67,17 +71,17 @@ public class Device extends AbstractDevice {
         final String newValue = updateDeviceState.getValue();
 
         if (!state.getId().equals(deviceId)) {
-            log.info("Unknown Device: {} - Please connect first.", deviceId);
+            log.info("Unknown Device id={} - Please connect first.", deviceId);
             return effects().reply(Empty.getDefaultInstance());
         } else {
-
-            log.info("Device id={} state changed: {}", deviceId, newValue);
-
+            log.info("Device id={} state changed={}", deviceId, newValue);
             final DeviceState newState = state.toBuilder()
                     .setId(deviceId)
                     .setName(state.getName())
                     .setType(state.getType())
                     .setValue(newValue)
+                    .setMacAddress(state.getMacAddress())
+                    .setCreatedTimestamp(state.getCreatedTimestamp())
                     .build();
 
             return effects()

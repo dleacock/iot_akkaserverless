@@ -14,6 +14,7 @@ message ConnectDevice {
     string name = 2;
     domain.DeviceType type = 3;
     string value = 4;
+    string mac_address = 5;
 }
 
 message UpdateDeviceState {
