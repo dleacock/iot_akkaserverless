@@ -6,13 +6,28 @@ import "akkaserverless/annotations.proto";
 
 option java_outer_classname = "SmartThermostatDomain";
 
-option (akkaserverless.file).value_entity = {
+option (akkaserverless.file).event_sourced_entity = {
     name: "SmartThermostat"
     entity_type: "smartthermostat"
     state: "SmartThermostatState"
+    events: ['SmartThermostatCreated', 'TemperatureChanged', 'TemperatureAlert']
 };
 
 message SmartThermostatState {
     string id = 1;
     string value = 2;
 }
+
+message SmartThermostatCreated {
+    string id = 1;
+    string value = 2;
+}
+
+message TemperatureChanged {
+    string value = 1;
+}
+
+message TemperatureAlert {
+    string value = 1;
+}
+

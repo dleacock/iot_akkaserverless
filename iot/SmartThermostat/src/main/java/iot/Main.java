@@ -22,9 +22,7 @@ public final class Main {
     // and is kept up-to-date with any changes in your protobuf definitions.
     // If you prefer, you may remove this and manually register these components in a
     // `new AkkaServerless()` instance.
-    return AkkaServerlessFactory.withComponents(
-      SmartThermostat::new,
-      DeviceTopicSubscriptionAction::new);
+    return AkkaServerlessFactory.withComponents(SmartThermostat::new, DeviceTopicSubscriptionAction::new);
   }
 
   public static void main(String[] args) throws Exception {

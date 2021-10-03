@@ -4,12 +4,17 @@
  */
 package iot.domain;
 
-import com.akkaserverless.javasdk.valueentity.ValueEntityContext;
+import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 import iot.api.SmartThermostatApi;
+import iot.domain.SmartThermostatDomain.SmartThermostatCreated;
 import iot.domain.SmartThermostatDomain.SmartThermostatState;
+import iot.domain.SmartThermostatDomain.TemperatureAlert;
+import iot.domain.SmartThermostatDomain.TemperatureChanged;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * A value entity.
@@ -19,7 +24,7 @@ public class SmartThermostat extends AbstractSmartThermostat {
     private final String entityId;
     private static final Logger log = LoggerFactory.getLogger(SmartThermostat.class);
 
-    public SmartThermostat(ValueEntityContext context) {
+    public SmartThermostat(EventSourcedEntityContext context) {
         this.entityId = context.entityId();
     }
 
@@ -31,31 +36,66 @@ public class SmartThermostat extends AbstractSmartThermostat {
     @Override
     public Effect<Empty> upsertSmartThermostat(SmartThermostatState currentState, SmartThermostatApi.SmartThermostat smartThermostat) {
         final String smartThermostatId = smartThermostat.getId();
-        final String currentValue = smartThermostat.getValue();
+        final String newTemperature = smartThermostat.getValue();
 
         if (currentState.getId().equals(smartThermostatId)) {
-            log.info("Updating state for {} from {} to {}", smartThermostatId,  currentState.getValue(), currentValue);
+            final TemperatureChanged temperatureChanged = TemperatureChanged.newBuilder().setValue(newTemperature).build();
+            if (Integer.parseInt(newTemperature) > 40 || Integer.parseInt(newTemperature) < 20) {
+                final TemperatureAlert temperatureAlert = TemperatureAlert.newBuilder().setValue(newTemperature).build();
 
-            final SmartThermostatState updatedSmartThermostatState = currentState.toBuilder()
-                    .setId(smartThermostatId)
-                    .setValue(currentValue)
-                    .build();
+                // This is where we could contact an external API to send a SMS or Email notification
+                contactExternalService();
+
+                return effects()
+                        .emitEvents(List.of(temperatureChanged, temperatureAlert))
+                        .thenReply(newState -> Empty.getDefaultInstance());
+            }
 
             return effects()
-                    .updateState(updatedSmartThermostatState)
-                    .thenReply(Empty.getDefaultInstance());
+                    .emitEvent(temperatureChanged)
+                    .thenReply(newState -> Empty.getDefaultInstance());
         } else {
-            log.info("Connecting SmartThermostat id={}, current value={}", smartThermostatId, currentValue);
-
-            final SmartThermostatState newState = currentState.toBuilder()
+            final SmartThermostatCreated SmartThermostatCreated = SmartThermostatDomain.SmartThermostatCreated.newBuilder()
                     .setId(smartThermostatId)
-                    .setValue(currentValue)
+                    .setValue(newTemperature)
                     .build();
 
             return effects()
-                    .updateState(newState)
-                    .thenReply(Empty.getDefaultInstance());
+                    .emitEvent(SmartThermostatCreated)
+                    .thenReply(newState -> Empty.getDefaultInstance());
         }
+    }
+
+    @Override
+    public SmartThermostatState smartThermostatCreated(SmartThermostatState currentState, SmartThermostatCreated smartThermostatCreated) {
+        final String id = smartThermostatCreated.getId();
+        final String value = smartThermostatCreated.getValue();
+        log.info("SmartThermostat Created id={}, initial value={}", id, value);
+
+        return SmartThermostatState.newBuilder().setId(id).setValue(value).build();
+    }
+
+    @Override
+    public SmartThermostatState temperatureChanged(SmartThermostatState currentState, TemperatureChanged temperatureChanged) {
+        final String id = currentState.getId();
+        final String currentTemperature = currentState.getValue();
+        final String updatedTemperature = temperatureChanged.getValue();
+        log.info("Updating temperature id={} from={} to={}", id, currentTemperature, updatedTemperature);
+
+        return SmartThermostatState.newBuilder().setId(id).setValue(updatedTemperature).build();
+    }
+
+    @Override
+    public SmartThermostatState temperatureAlert(SmartThermostatState currentState, TemperatureAlert temperatureAlert) {
+        final String id = currentState.getId();
+        final String value = temperatureAlert.getValue();
+        log.info("Alert Triggered for SmartThermostat id={} due to current temperature of value={}", id, value);
+
+        return SmartThermostatState.newBuilder().setId(id).setValue(value).build();
+    }
+
+    private void contactExternalService() {
+        log.info("*** Calling External Service to send SMS Notification of temperature alert. ***");
     }
 }
 
