@@ -16,6 +16,7 @@ option (akkaserverless.file).event_sourced_entity = {
 message SmartThermostatState {
     string id = 1;
     string value = 2;
+    repeated TemperatureAlert alerts = 3;
 }
 
 message SmartThermostatCreated {

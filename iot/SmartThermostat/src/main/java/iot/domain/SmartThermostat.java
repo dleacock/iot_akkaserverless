@@ -14,6 +14,7 @@ import iot.domain.SmartThermostatDomain.TemperatureChanged;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -89,9 +90,14 @@ public class SmartThermostat extends AbstractSmartThermostat {
     public SmartThermostatState temperatureAlert(SmartThermostatState currentState, TemperatureAlert temperatureAlert) {
         final String id = currentState.getId();
         final String value = temperatureAlert.getValue();
-        log.info("Alert Triggered for SmartThermostat id={} due to current temperature of value={}", id, value);
+        final String alert = String.format("Alert Triggered for SmartThermostat id=%s due to current temperature of value=%s", id, value);
 
-        return SmartThermostatState.newBuilder().setId(id).setValue(value).build();
+        log.info(alert);
+        final List<TemperatureAlert> currentAlerts = currentState.getAlertsList();
+        final ArrayList<TemperatureAlert> temperatureAlerts = new ArrayList<>(currentAlerts);
+        temperatureAlerts.add(temperatureAlert);
+
+        return SmartThermostatState.newBuilder().setId(id).addAllAlerts(temperatureAlerts).setValue(value).build();
     }
 
     private void contactExternalService() {
